@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Didi Studio - Zoom & Flip</title>
+    <title>Didi Studio - Zoom Mode</title>
     
     <!-- THƯ VIỆN -->
     <script src="https://cdn.tailwindcss.com"></script>
@@ -15,14 +15,18 @@
         body { font-family: 'Outfit', sans-serif; background-color: #050505; color: #e5e5e5; }
         .no-scrollbar::-webkit-scrollbar { display: none; }
 
-        /* --- GRID ITEM STYLE --- */
-        .product-card { transition: transform 0.2s; }
-        .product-card:active { transform: scale(0.95); } /* Hiệu ứng nhún khi bấm */
+        /* --- GRID CARD --- */
+        .product-card { 
+            transition: transform 0.2s; 
+            cursor: pointer; 
+            -webkit-tap-highlight-color: transparent; /* Bỏ màu xanh khi tap trên mobile */
+        }
+        .product-card:active { transform: scale(0.97); }
 
-        /* --- MODAL ZOOM STYLE --- */
+        /* --- MODAL ZOOM --- */
         #productModal {
             backdrop-filter: blur(10px);
-            transition: opacity 0.3s ease;
+            transition: opacity 0.2s ease;
         }
         .modal-content {
             transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
@@ -32,19 +36,16 @@
             transform: scale(1); opacity: 1;
         }
 
-        /* --- FLIP ANIMATION (TRONG MODAL) --- */
+        /* --- FLIP ANIMATION --- */
         .flip-container { perspective: 1000px; }
         #modalImg { 
-            transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.3s; 
+            transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.2s; 
             transform-style: preserve-3d;
             backface-visibility: hidden;
         }
-        .is-flipped { transform: rotateY(180deg); }
 
-        /* --- UI ELEMENTS --- */
+        /* --- UI KHÁC --- */
         .cat-btn.active { color: #fed7aa; border-bottom: 2px solid #fed7aa; }
-        
-        /* Vòng quay */
         .wheel-container {
             position: relative; width: 280px; height: 280px; border-radius: 50%; border: 4px solid #333;
             background: conic-gradient(#ef4444 0deg 60deg, #14b8a6 60deg 120deg, #ef4444 120deg 180deg, #14b8a6 180deg 240deg, #ef4444 240deg 300deg, #14b8a6 300deg 360deg);
@@ -76,7 +77,7 @@
         </div>
     </header>
 
-    <!-- PRODUCT LIST (GRID) -->
+    <!-- DANH SÁCH SẢN PHẨM -->
     <main class="max-w-md mx-auto px-4 py-6 flex-grow">
         <div id="loading" class="hidden text-center py-10 text-gray-600 text-xs">
             <i class="fa-solid fa-circle-notch fa-spin mb-2 text-xl"></i><br>Đang tải dữ liệu...
@@ -87,38 +88,36 @@
         </div>
     </main>
 
-    <!-- MODAL ZOOM (NEW FEATURE) -->
-    <div id="productModal" class="fixed inset-0 z-[80] bg-black/95 hidden flex items-center justify-center px-4">
-        <!-- Nút đóng -->
-        <button onclick="closeModal()" class="absolute top-6 right-6 text-white text-3xl z-50 hover:text-gray-400 transition">
-            <i class="fa-solid fa-xmark"></i>
-        </button>
+    <!-- --- MODAL ZOOM (CỬA SỔ BẬT LÊN) --- -->
+    <!-- Z-index 100 đảm bảo đè lên tất cả -->
+    <div id="productModal" class="fixed inset-0 z-[100] bg-black/95 hidden flex items-center justify-center px-4" onclick="closeModal()">
+        
+        <div class="modal-content w-full max-w-md flex flex-col items-center relative" onclick="event.stopPropagation()">
+            <!-- Nút đóng X -->
+            <button onclick="closeModal()" class="absolute -top-12 right-0 text-white text-3xl z-50 p-2">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
 
-        <div class="modal-content w-full max-w-md flex flex-col items-center relative">
-            
-            <!-- Khu vực ảnh lật -->
-            <div class="flip-container relative w-full aspect-[3/4] rounded-xl overflow-hidden bg-[#111] shadow-2xl border border-white/10 cursor-pointer" onclick="flipModalImage()">
+            <!-- Khu vực ảnh -->
+            <div class="flip-container relative w-full aspect-[3/4] rounded-xl overflow-hidden bg-[#111] shadow-2xl border border-white/10" onclick="flipModalImage()">
                 <img id="modalImg" src="" class="w-full h-full object-cover" data-idx="0">
                 
-                <!-- Hướng dẫn -->
+                <!-- Chỉ dẫn -->
                 <div class="absolute bottom-4 left-0 w-full text-center pointer-events-none">
                     <span class="text-white/60 text-[10px] bg-black/50 px-3 py-1 rounded-full backdrop-blur-md">
-                        <i class="fa-solid fa-hand-pointer mr-1"></i> Chạm vào ảnh để lật
+                        <i class="fa-solid fa-hand-pointer mr-1"></i> Chạm để lật ảnh
                     </span>
                 </div>
-                
-                <!-- Icon Lật góc trên -->
-                <div class="absolute top-3 right-3 text-white/80 bg-black/40 p-2 rounded-full">
+                <div class="absolute top-3 right-3 text-white/80 bg-black/40 p-2 rounded-full pointer-events-none">
                     <i class="fa-solid fa-rotate text-sm"></i>
                 </div>
             </div>
 
-            <!-- Thông tin dưới ảnh -->
+            <!-- Thông tin & Nút Mua -->
             <div class="mt-6 w-full text-center">
                 <h2 id="modalCode" class="text-2xl font-bold text-white tracking-widest mb-1">CODE</h2>
                 <p id="modalName" class="text-gray-400 text-sm mb-6">Tên sản phẩm</p>
                 
-                <!-- Nút mua hàng to -->
                 <div class="flex gap-3 justify-center w-full">
                     <a id="modalShopee" href="#" target="_blank" class="flex-1 py-3 rounded-lg bg-[#ee4d2d] hover:bg-orange-600 text-white font-bold flex justify-center items-center gap-2 transition transform active:scale-95">
                         <img src="https://upload.wikimedia.org/wikipedia/commons/f/fe/Shopee.svg" class="h-5 brightness-0 invert"> Shopee
@@ -137,7 +136,7 @@
         <a href="https://www.tiktok.com/@username" target="_blank" class="w-10 h-10 bg-black border border-gray-700 rounded-full shadow-lg text-white flex items-center justify-center hover:scale-110 transition"><i class="fa-brands fa-tiktok text-sm"></i></a>
     </div>
 
-    <!-- VÒNG QUAY MODAL -->
+    <!-- VÒNG QUAY -->
     <div id="wheelModal" class="fixed inset-0 z-[90] hidden flex items-center justify-center px-4 bg-black/90 backdrop-blur-sm">
         <div class="bg-[#181818] w-full max-w-xs rounded-2xl p-6 border border-gray-800 flex flex-col items-center relative shadow-2xl">
             <button onclick="closeWheel()" class="absolute top-3 right-4 text-gray-500 hover:text-white"><i class="fa-solid fa-xmark"></i></button>
@@ -156,19 +155,18 @@
 
     <!-- JAVASCRIPT -->
     <script>
-        // --- CẤU HÌNH ---
         const USE_GOOGLE_SHEET = true; 
         
-        // DÁN LINK CSV CỦA BẠN VÀO ĐÂY
-        const SHEET_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQJs9fScBM0g7yKHn2JC6fi5EK9K9T5uUyyr-oaQelQkvKrT8v2NKi-8Bx3V0pugjeVXH3Gqtn1aCQTNh/pub?gid=0&single=true&output=csv'; 
+        // --- DÁN LINK CSV CỦA BẠN VÀO ĐÂY ---
+        const SHEET_URL = 'DÁN_LINK_CSV_CỦA_BẠN_VÀO_ĐÂY'; 
+        // -------------------------------------
 
-        // LINK GITHUB ẢNH
         const GITHUB_IMAGE_BASE = "https://wnoS125.github.io/didistudio/images/";
-        const IS_OUT_OF_STOCK = true; 
+        const IS_OUT_OF_STOCK = false; 
 
         let allProducts = [];
         let currentCategory = 'all';
-        let currentModalProductId = null; // ID sản phẩm đang mở trong modal
+        let currentModalProductId = null;
 
         function init() {
             if(USE_GOOGLE_SHEET) {
@@ -202,7 +200,6 @@
             }
         }
 
-        // --- RENDER GRID (ĐÃ SỬA ĐỂ CLICK LÀ MỞ MODAL) ---
         function renderProducts(data) {
             const container = document.getElementById('productList');
             const empty = document.getElementById('emptyState');
@@ -213,20 +210,16 @@
             
             data.forEach(p => {
                 const img1 = p.images[0];
+                // Onclick gọi hàm openModal
                 const html = `
-                    <div class="product-card relative rounded-lg overflow-hidden border border-white/5 shadow-lg cursor-pointer group" 
+                    <div class="product-card relative rounded-lg overflow-hidden border border-white/5 shadow-lg group" 
                          onclick="openModal(${p.id})">
-                        
                         <div class="aspect-[3/4] bg-[#111] relative">
-                            <!-- Ảnh Grid -->
                             <img src="${img1}" onerror="this.src='https://via.placeholder.com/300x400?text=Loading'" class="w-full h-full object-cover">
-                            
-                            <!-- Info nhỏ -->
                             <div class="absolute bottom-0 left-0 w-full bg-gradient-to-t from-black via-black/60 to-transparent p-3 pt-6">
                                 <div class="text-white font-bold tracking-widest">${p.code}</div>
                                 <div class="text-gray-400 text-[10px] truncate">${p.name}</div>
                             </div>
-                            
                             ${p.isHot ? '<div class="absolute top-2 left-2 text-orange-500 animate-pulse"><i class="fa-solid fa-fire"></i></div>' : ''}
                         </div>
                     </div>
@@ -235,10 +228,7 @@
             });
         }
 
-        // ==================================================================
-        // 3. LOGIC MODAL ZOOM & FLIP (TÍNH NĂNG MỚI)
-        // ==================================================================
-        
+        // --- LOGIC MODAL ---
         function openModal(pid) {
             const p = allProducts.find(i => i.id === pid);
             if (!p) return;
@@ -247,17 +237,15 @@
             const modal = document.getElementById('productModal');
             const img = document.getElementById('modalImg');
             
-            // Reset trạng thái
+            // Reset ảnh về mặt trước
             img.src = p.images[0];
             img.setAttribute('data-idx', 0);
             img.style.transform = "rotateY(0deg)";
             img.style.opacity = "1";
 
-            // Điền thông tin
             document.getElementById('modalCode').innerText = p.code;
             document.getElementById('modalName').innerText = p.name;
             
-            // Cập nhật link nút bấm
             const btnShopee = document.getElementById('modalShopee');
             const btnTiktok = document.getElementById('modalTiktok');
             
@@ -275,38 +263,29 @@
                 btnTiktok.classList.add('hidden');
             }
 
-            // Hiển thị Modal
             modal.classList.remove('hidden');
-            // Timeout nhỏ để CSS transition hoạt động mượt
             setTimeout(() => { modal.classList.add('open'); }, 10);
         }
 
         function closeModal() {
             const modal = document.getElementById('productModal');
             modal.classList.remove('open');
-            setTimeout(() => { modal.classList.add('hidden'); }, 300);
+            setTimeout(() => { modal.classList.add('hidden'); }, 200);
             currentModalProductId = null;
         }
 
         function flipModalImage() {
             if (currentModalProductId === null) return;
             const p = allProducts.find(i => i.id === currentModalProductId);
-            if (!p) return;
-
             const img = document.getElementById('modalImg');
             const currentIdx = parseInt(img.getAttribute('data-idx'));
             
-            // Tìm ảnh tiếp theo (nếu có)
             let nextIdx = currentIdx === 0 ? 1 : 0;
             let nextSrc = p.images[nextIdx];
-            
-            // Nếu không có ảnh 2 thì không lật
             if (!nextSrc) return; 
 
-            // Hiệu ứng xoay 90 độ -> Đổi ảnh -> Xoay về 0 độ
             img.style.transform = "rotateY(90deg)";
             img.style.opacity = "0.5";
-            
             setTimeout(() => {
                 img.src = nextSrc;
                 img.setAttribute('data-idx', nextIdx);
@@ -315,14 +294,7 @@
             }, 250);
         }
 
-        // Đóng modal khi click ra vùng đen bên ngoài
-        document.getElementById('productModal').addEventListener('click', function(e) {
-            if (e.target === this) closeModal();
-        });
-
-        // ==================================================================
-        // CÁC CHỨC NĂNG KHÁC (Filter, Wheel...) - GIỮ NGUYÊN
-        // ==================================================================
+        // --- CÁC HÀM KHÁC GIỮ NGUYÊN ---
         function filterProducts() {
             const key = document.getElementById('searchInput').value.toLowerCase();
             const filtered = allProducts.filter(p => {
