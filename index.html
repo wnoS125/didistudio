@@ -1,0 +1,321 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Cinematic Store - Full Option</title>
+    
+    <!-- THƯ VIỆN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
+    
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&display=swap');
+        body { font-family: 'Outfit', sans-serif; background-color: #050505; color: #e5e5e5; }
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+
+        /* --- 1. HIỆU ỨNG ÁNH SÁNG CINEMATIC --- */
+        /* Lớp phủ tối (Dimmed) */
+        .dim-overlay {
+            position: absolute; inset: 0;
+            background-color: rgba(0, 0, 0, 0.7); 
+            transition: all 0.5s ease;
+            z-index: 20;
+            backdrop-filter: grayscale(90%);
+        }
+        /* Đèn Spotlight 4000K */
+        .spotlight-beam {
+            position: absolute; inset: -50%;
+            width: 200%; height: 200%;
+            background: radial-gradient(circle at 50% 20%, rgba(255, 200, 150, 0.4) 0%, rgba(255, 200, 150, 0.05) 40%, transparent 70%);
+            opacity: 0; pointer-events: none; transition: opacity 0.6s ease;
+            z-index: 25; transform: translate(-25%, -25%);
+        }
+        /* Trạng thái Active (Được chọn) */
+        .product-card.active .dim-overlay { background-color: transparent; backdrop-filter: grayscale(0%); pointer-events: none; }
+        .product-card.active .spotlight-beam { opacity: 1; }
+        .product-card.active { transform: scale(1.02); z-index: 30; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.5); border-color: rgba(255,255,255,0.2); }
+        
+        /* Action Buttons (Mua/Chat) chỉ hiện khi Active */
+        .action-buttons { opacity: 0; transform: translateY(10px); transition: all 0.3s ease; pointer-events: none; }
+        .product-card.active .action-buttons { opacity: 1; transform: translateY(0); pointer-events: auto; }
+
+        /* Animation Lật ảnh */
+        .card-container { perspective: 1000px; }
+        .card-image { transition: transform 0.5s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.3s; backface-visibility: hidden; }
+
+        /* --- 2. CSS VÒNG QUAY --- */
+        .wheel-container {
+            position: relative; width: 280px; height: 280px; border-radius: 50%; border: 4px solid #333;
+            background: conic-gradient(#ef4444 0deg 60deg, #14b8a6 60deg 120deg, #ef4444 120deg 180deg, #14b8a6 180deg 240deg, #ef4444 240deg 300deg, #14b8a6 300deg 360deg);
+            transition: transform 4s cubic-bezier(0.17, 0.67, 0.12, 0.99);
+        }
+        .wheel-pointer { position: absolute; top: -15px; left: 50%; transform: translateX(-50%); border-left: 15px solid transparent; border-right: 15px solid transparent; border-top: 25px solid #fff; z-index: 10; }
+
+        /* Active Category Style */
+        .cat-btn.active { color: #fed7aa; border-bottom: 2px solid #fed7aa; } /* Màu cam nhạt */
+    </style>
+</head>
+<body class="pb-24 min-h-screen flex flex-col">
+
+    <!-- HEADER & SEARCH -->
+    <header class="sticky top-0 z-50 bg-black/90 backdrop-blur-xl border-b border-white/5 pt-4 pb-0">
+        <div class="max-w-md mx-auto px-4 flex justify-between items-center mb-4">
+            <div class="text-lg font-bold tracking-[0.2em] text-white">CINEMA<span class="text-orange-300">STORE</span></div>
+            <div class="relative w-1/2">
+                <input type="text" id="searchInput" onkeyup="filterProducts()" placeholder="Tìm mã A01..." 
+                    class="w-full bg-[#1a1a1a] text-white text-xs rounded-full pl-8 pr-4 py-2 focus:outline-none border border-gray-800 focus:border-orange-300/50 transition-colors placeholder-gray-600">
+                <i class="fa-solid fa-search absolute left-3 top-2.5 text-gray-500 text-[10px]"></i>
+            </div>
+        </div>
+        
+        <!-- CATEGORY MENU (Đã sửa lỗi click) -->
+        <div class="max-w-md mx-auto px-4">
+            <div class="flex gap-6 overflow-x-auto no-scrollbar pb-0 text-xs font-medium uppercase tracking-wide text-gray-500 h-8">
+                <button onclick="setCategory('all')" class="cat-btn active transition-colors h-full">Tất cả</button>
+                <button onclick="setCategory('dam')" class="cat-btn transition-colors h-full hover:text-white">Đầm</button>
+                <button onclick="setCategory('ao')" class="cat-btn transition-colors h-full hover:text-white">Áo</button>
+                <button onclick="setCategory('quan')" class="cat-btn transition-colors h-full hover:text-white">Quần</button>
+                <button onclick="setCategory('phukien')" class="cat-btn transition-colors h-full hover:text-white">Phụ Kiện</button>
+            </div>
+        </div>
+    </header>
+
+    <!-- PRODUCT LIST -->
+    <main class="max-w-md mx-auto px-4 py-6 flex-grow">
+        <div id="loading" class="hidden text-center py-10 text-gray-600 text-xs">Đang tải dữ liệu...</div>
+        <div id="productList" class="grid grid-cols-2 gap-4"></div>
+        <div id="emptyState" class="hidden text-center py-20 text-gray-600">
+            <i class="fa-solid fa-ghost text-2xl mb-2"></i>
+            <p class="text-xs">Không tìm thấy sản phẩm</p>
+        </div>
+    </main>
+
+    <!-- FLOATING BUTTONS (Đã khôi phục) -->
+    <div class="fixed bottom-6 right-4 flex flex-col gap-3 z-[60]">
+        <!-- Nút Quay -->
+        <button onclick="openWheel()" class="w-10 h-10 bg-gradient-to-br from-pink-600 to-purple-600 rounded-full shadow-lg shadow-pink-500/30 text-white flex items-center justify-center animate-bounce">
+            <i class="fa-solid fa-gift text-sm"></i>
+        </button>
+        <!-- Nút Chat -->
+        <a href="https://www.tiktok.com/@username" target="_blank" class="w-10 h-10 bg-black border border-gray-700 rounded-full shadow-lg text-white flex items-center justify-center relative hover:scale-110 transition">
+            <i class="fa-brands fa-tiktok text-sm"></i>
+            <span class="absolute top-0 right-0 w-2 h-2 bg-green-500 rounded-full border border-black"></span>
+        </a>
+    </div>
+
+    <!-- MODAL VÒNG QUAY -->
+    <div id="wheelModal" class="fixed inset-0 z-[70] hidden flex items-center justify-center px-4 bg-black/90 backdrop-blur-sm transition-opacity">
+        <div class="bg-[#181818] w-full max-w-xs rounded-2xl p-6 border border-gray-800 flex flex-col items-center relative shadow-2xl">
+            <button onclick="closeWheel()" class="absolute top-3 right-4 text-gray-500 hover:text-white"><i class="fa-solid fa-xmark"></i></button>
+            <h3 class="text-lg font-bold text-white mb-1">Vòng Quay May Mắn</h3>
+            <div class="relative mb-6 mt-4">
+                <div class="wheel-pointer"></div>
+                <div id="wheel" class="wheel-container relative">
+                     <!-- Text trang trí -->
+                    <span class="absolute top-10 right-10 text-white font-bold text-[10px] rotate-45">SALE</span>
+                    <span class="absolute top-10 left-10 text-white font-bold text-[10px] -rotate-45">MISS</span>
+                </div>
+                <button onclick="spinWheel()" id="spinBtn" class="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-12 h-12 bg-white text-black font-bold rounded-full text-xs shadow-lg border-2 border-gray-300 z-10">QUAY</button>
+            </div>
+            <div id="wheelResult" class="text-center h-6 text-sm font-bold text-teal-400"></div>
+        </div>
+    </div>
+
+    <!-- JAVASCRIPT -->
+    <script>
+        // --- CẤU HÌNH ---
+        const USE_GOOGLE_SHEET = true; // Đổi thành true khi dùng thật
+        const SHEET_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQJs9fScBM0g7yKHn2JC6fi5EK9T5uUyyr-oaQeIQkvKrT8v2NKi-8Bx3V0pugjeVXH3Gqtn1aCQTNh/pub?gid=0&single=true&output=csv';
+        const IS_OUT_OF_STOCK = true; // true = luôn trượt, false = có trúng
+
+        // --- DỮ LIỆU MẪU (DEMO) ---
+        const demoProducts = [
+            { id: 1, code: "D01", category: "dam", name: "Đầm Lụa Satin", images: ["https://images.unsplash.com/photo-1595777457583-95e059d581b8?w=500&q=80", "https://images.unsplash.com/photo-1515372039744-b8f02a3ae446?w=500&q=80"], isHot: true, links: {shopee:"https://shopee.vn", tiktok:"https://tiktok.com"} },
+            { id: 2, code: "A02", category: "ao", name: "Áo Thun Basic", images: ["https://images.unsplash.com/photo-1554568218-0f1715e72254?w=500&q=80"], isHot: false, links: {shopee:"", tiktok:"https://tiktok.com"} },
+            { id: 3, code: "Q03", category: "quan", name: "Quần Cargo", images: ["https://images.unsplash.com/photo-1541099649105-f69ad21f3246?w=500&q=80"], isHot: true, links: {shopee:"https://shopee.vn", tiktok:""} },
+            { id: 4, code: "PK1", category: "phukien", name: "Túi Xách Da", images: ["https://images.unsplash.com/photo-1584917865442-de89df76afd3?w=500&q=80"], isHot: false, links: {shopee:"https://shopee.vn", tiktok:"https://tiktok.com"} }
+        ];
+
+        let allProducts = [];
+        let currentCategory = 'all';
+        let activeProductId = null;
+
+        // --- KHỞI TẠO ---
+        function init() {
+            if(USE_GOOGLE_SHEET) {
+                document.getElementById('loading').classList.remove('hidden');
+                Papa.parse(SHEET_URL, {
+                    download: true, header: true,
+                    complete: function(results) {
+                        allProducts = results.data.map((row, idx) => ({
+                            id: idx,
+                            code: row.code || '???',
+                            category: row.category || 'khac', // Cột category: dam, ao, quan, phukien
+                            name: row.name || 'Sản phẩm',
+                            images: [row.image1, row.image2, row.image3, row.image4].filter(u => u && u.length > 5),
+                            isHot: (row.is_hot === 'TRUE'),
+                            links: { shopee: row.shopee_link, tiktok: row.tiktok_link }
+                        }));
+                        document.getElementById('loading').classList.add('hidden');
+                        filterProducts();
+                    }
+                });
+            } else {
+                allProducts = demoProducts;
+                filterProducts();
+            }
+        }
+
+        // --- RENDER CINEMATIC ---
+        function renderProducts(data) {
+            const container = document.getElementById('productList');
+            const empty = document.getElementById('emptyState');
+            container.innerHTML = '';
+
+            if(data.length === 0) { empty.classList.remove('hidden'); return; }
+            empty.classList.add('hidden');
+            
+            data.forEach(p => {
+                // Buttons
+                let btns = '';
+                if(p.links.shopee) btns += `<a href="${p.links.shopee}" target="_blank" class="w-8 h-8 rounded-full bg-[#ee4d2d] flex items-center justify-center hover:scale-110 transition shadow-lg"><img src="https://upload.wikimedia.org/wikipedia/commons/f/fe/Shopee.svg" class="h-4 brightness-0 invert"></a>`;
+                if(p.links.tiktok) btns += `<a href="${p.links.tiktok}" target="_blank" class="w-8 h-8 rounded-full bg-white text-black flex items-center justify-center hover:scale-110 transition shadow-lg"><i class="fa-brands fa-tiktok"></i></a>`;
+
+                const html = `
+                    <div id="product-${p.id}" class="product-card relative rounded-lg transition-all duration-500 border border-transparent group" onclick="handleInteraction(this, ${p.id})">
+                        
+                        <div class="card-container relative aspect-[3/4] bg-[#111] rounded-lg overflow-hidden">
+                            <!-- Spotlight Beam -->
+                            <div class="spotlight-beam"></div>
+
+                            <!-- Image -->
+                            <img src="${p.images[0]}" data-idx="0" class="card-image w-full h-full object-cover">
+                            
+                            <!-- Dim Overlay (Mặc định) -->
+                            <div class="dim-overlay flex items-center justify-center">
+                                <span class="text-white/60 text-[10px] tracking-widest border border-white/20 px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition">CHẠM ĐỂ XEM</span>
+                            </div>
+
+                            <!-- Info -->
+                            <div class="absolute top-2 left-2 z-40 ${p.isHot ? '' : 'hidden'}"><i class="fa-solid fa-fire text-orange-500 drop-shadow-lg animate-pulse"></i></div>
+                            <div class="absolute bottom-0 left-0 w-full bg-gradient-to-t from-black via-black/80 to-transparent p-3 pt-8 z-40">
+                                <div class="text-white font-bold text-lg tracking-widest">${p.code}</div>
+                                <div class="text-gray-400 text-[10px] truncate mb-2">${p.name}</div>
+                                
+                                <!-- Action Buttons (Hiện khi Active) -->
+                                <div class="action-buttons flex gap-2">
+                                    ${btns}
+                                </div>
+                            </div>
+
+                            <!-- Flip Hint -->
+                            ${p.images.length > 1 ? `<div class="absolute top-2 right-2 z-40 text-[10px] text-white/50 bg-black/50 px-1.5 rounded-full"><i class="fa-solid fa-rotate"></i></div>` : ''}
+                        </div>
+                    </div>
+                `;
+                container.innerHTML += html;
+            });
+        }
+
+        // --- TƯƠNG TÁC (CLICK 1: SÁNG, CLICK 2: LẬT) ---
+        function handleInteraction(element, pid) {
+            // Nếu chưa active -> Active nó
+            if (activeProductId !== pid) {
+                // Tắt đèn cái cũ
+                if (activeProductId !== null) {
+                    const oldEl = document.getElementById(`product-${activeProductId}`);
+                    if(oldEl) oldEl.classList.remove('active');
+                }
+                // Bật đèn cái mới
+                element.classList.add('active');
+                activeProductId = pid;
+            } 
+            // Nếu đã active -> Lật ảnh
+            else {
+                flipImage(element, pid);
+            }
+        }
+
+        function flipImage(element, pid) {
+            const p = allProducts.find(i => i.id === pid);
+            if(!p || p.images.length < 2) return;
+
+            const img = element.querySelector('img');
+            const currentIdx = parseInt(img.getAttribute('data-idx'));
+            
+            img.style.transform = "rotateY(90deg) scale(0.9)";
+            img.style.opacity = "0.5";
+            
+            setTimeout(() => {
+                const nextIdx = (currentIdx + 1) % p.images.length;
+                img.src = p.images[nextIdx];
+                img.setAttribute('data-idx', nextIdx);
+                img.style.transform = "rotateY(0deg) scale(1)";
+                img.style.opacity = "1";
+            }, 250);
+        }
+
+        // --- LỌC SẢN PHẨM & DANH MỤC ---
+        function filterProducts() {
+            const key = document.getElementById('searchInput').value.toLowerCase();
+            const filtered = allProducts.filter(p => {
+                const matchKey = p.name.toLowerCase().includes(key) || p.code.toLowerCase().includes(key);
+                const matchCat = currentCategory === 'all' || p.category === currentCategory;
+                return matchKey && matchCat;
+            });
+            renderProducts(filtered);
+        }
+
+        function setCategory(catId) {
+            currentCategory = catId;
+            // Cập nhật giao diện nút bấm
+            const btns = document.querySelectorAll('.cat-btn');
+            btns.forEach(btn => btn.classList.remove('active'));
+            event.target.classList.add('active');
+            
+            // Reset trạng thái chọn
+            activeProductId = null;
+            
+            // Lọc lại
+            filterProducts();
+        }
+
+        // --- GAME VÒNG QUAY ---
+        function openWheel() { document.getElementById('wheelModal').classList.remove('hidden'); }
+        function closeWheel() { document.getElementById('wheelModal').classList.add('hidden'); }
+        
+        let isSpinning = false;
+        function spinWheel() {
+            if (isSpinning) return;
+            isSpinning = true;
+            const wheel = document.getElementById('wheel');
+            const result = document.getElementById('wheelResult');
+            result.innerText = "...";
+
+            let stopDegree = IS_OUT_OF_STOCK 
+                ? 360 * 5 + (Math.random() * 40 + 10)  // Quay vào Đỏ
+                : 360 * 5 + (Math.random() * 40 + 70); // Quay vào Xanh
+
+            wheel.style.transform = `rotate(-${stopDegree}deg)`;
+
+            setTimeout(() => {
+                isSpinning = false;
+                result.innerText = IS_OUT_OF_STOCK ? "Chúc bạn may mắn lần sau!" : "Trúng Voucher: FREESHIP";
+                if(!IS_OUT_OF_STOCK) {
+                    setTimeout(() => {
+                        navigator.clipboard.writeText("FREESHIP");
+                        alert("Đã copy mã: FREESHIP");
+                        closeWheel();
+                    }, 1500);
+                }
+            }, 4000);
+        }
+
+        // Chạy lần đầu
+        init();
+
+    </script>
+</body>
+</html>
