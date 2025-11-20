@@ -3,7 +3,6 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <!-- 1. ĐÃ SỬA TIÊU ĐỀ -->
     <title>Didi Studio</title>
     
     <!-- THƯ VIỆN -->
@@ -25,32 +24,18 @@
         .modal-content { transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); transform: scale(0.9); opacity: 0; }
         #productModal.open .modal-content { transform: scale(1); opacity: 1; }
 
-        /* --- 2. HIỆU ỨNG LẬT 3D MỚI (SIÊU MƯỢT) --- */
+        /* --- HIỆU ỨNG LẬT 3D --- */
         .perspective-1000 { perspective: 1000px; }
-        
-        /* Khối chứa 2 mặt */
         #flipInner {
-            position: relative;
-            width: 100%; height: 100%;
-            text-align: center;
-            transition: transform 0.8s cubic-bezier(0.4, 0, 0.2, 1); /* Thời gian và độ mượt */
-            transform-style: preserve-3d;
+            position: relative; width: 100%; height: 100%; text-align: center;
+            transition: transform 0.8s cubic-bezier(0.4, 0, 0.2, 1); transform-style: preserve-3d;
         }
-
-        /* Class để kích hoạt lật */
         .do-flip { transform: rotateY(180deg); }
-
-        /* Định dạng chung cho mặt trước và sau */
         .flip-face {
-            position: absolute; inset: 0;
-            width: 100%; height: 100%;
-            -webkit-backface-visibility: hidden; /* Safari */
-            backface-visibility: hidden;
-            border-radius: 0.75rem; /* rounded-xl */
-            overflow: hidden;
+            position: absolute; inset: 0; width: 100%; height: 100%;
+            -webkit-backface-visibility: hidden; backface-visibility: hidden;
+            border-radius: 0.75rem; overflow: hidden;
         }
-
-        /* Mặt sau (xoay sẵn 180 độ) */
         .flip-back { transform: rotateY(180deg); }
 
         /* --- UI KHÁC --- */
@@ -97,11 +82,10 @@
         </div>
     </main>
 
-    <!-- MODAL ZOOM (CẤU TRÚC MỚI) -->
+    <!-- MODAL ZOOM -->
     <div id="productModal" class="fixed inset-0 z-[100] bg-black/95 hidden flex items-center justify-center px-4" onclick="closeModal()">
         <div class="modal-content w-full max-w-md flex flex-col items-center relative" onclick="event.stopPropagation()">
             
-            <!-- Nút đóng X -->
             <button onclick="closeModal()" class="absolute -top-12 right-0 text-white text-3xl z-50 p-2 hover:scale-110 transition">
                 <i class="fa-solid fa-xmark"></i>
             </button>
@@ -109,40 +93,32 @@
             <!-- Container 3D Flip -->
             <div class="perspective-1000 relative w-full aspect-[3/4] cursor-pointer" onclick="flipModalImage()">
                 <div id="flipInner">
-                    
                     <!-- MẶT TRƯỚC -->
                     <div class="flip-face bg-[#111] border border-white/10 shadow-2xl">
                         <img id="modalImgFront" src="" class="w-full h-full object-cover">
-                        <!-- Chỉ dẫn mặt trước -->
                         <div class="absolute bottom-4 left-0 w-full text-center pointer-events-none">
                             <span class="text-white/60 text-[10px] bg-black/50 px-3 py-1 rounded-full backdrop-blur-md">
                                 <i class="fa-solid fa-hand-pointer mr-1"></i> Chạm để lật
                             </span>
                         </div>
-                        <div class="absolute top-3 right-3 text-white/80 bg-black/40 p-2 rounded-full pointer-events-none">
-                            <i class="fa-solid fa-rotate text-sm"></i>
-                        </div>
+                        <div class="absolute top-3 right-3 text-white/80 bg-black/40 p-2 rounded-full pointer-events-none"><i class="fa-solid fa-rotate text-sm"></i></div>
                     </div>
-
                     <!-- MẶT SAU -->
                     <div class="flip-face flip-back bg-[#111] border border-white/10 shadow-2xl">
                         <img id="modalImgBack" src="" class="w-full h-full object-cover">
-                        <!-- Chỉ dẫn mặt sau -->
                         <div class="absolute bottom-4 left-0 w-full text-center pointer-events-none">
                             <span class="text-white/60 text-[10px] bg-black/50 px-3 py-1 rounded-full backdrop-blur-md">
                                 <i class="fa-solid fa-rotate-left mr-1"></i> Chạm để quay lại
                             </span>
                         </div>
                     </div>
-
                 </div>
             </div>
 
-            <!-- Thông tin & Nút Mua -->
+            <!-- INFO -->
             <div class="mt-6 w-full text-center">
                 <h2 id="modalCode" class="text-2xl font-bold text-white tracking-widest mb-1">CODE</h2>
                 <p id="modalName" class="text-gray-400 text-sm mb-6">Tên sản phẩm</p>
-                
                 <div class="flex gap-3 justify-center w-full">
                     <a id="modalShopee" href="#" target="_blank" class="flex-1 py-3 rounded-lg bg-[#ee4d2d] hover:bg-orange-600 text-white font-bold flex justify-center items-center gap-2 transition transform active:scale-95">
                         <img src="https://upload.wikimedia.org/wikipedia/commons/f/fe/Shopee.svg" class="h-5 brightness-0 invert"> Shopee
@@ -182,7 +158,7 @@
     <script>
         const USE_GOOGLE_SHEET = true; 
         
-        // --- ĐÃ SỬA: THÊM https:// VÀO ĐẦU LINK ---
+        // --- LINK GỐC CHUẨN XÁC (ĐÃ FIX LỖI 404) ---
         const SHEET_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQJs9fScBM0g7yKHn2JC6fi5EK9T5uUyyr-oaQeIQkvKrT8v2NKi-8Bx3V0pugjeVXH3Gqtn1aCQTNh/pub?gid=0&single=true&output=csv'; 
         
         // LINK GITHUB ẢNH
@@ -200,7 +176,6 @@
                     complete: function(results) {
                         allProducts = results.data.map((row, idx) => {
                             let imgs = [];
-                            // Logic lấy ảnh
                             if (row.image1 && row.image1.length > 5) imgs.push(row.image1);
                             if (row.image2 && row.image2.length > 5) imgs.push(row.image2);
                             if (imgs.length === 0 && row.code) {
@@ -220,10 +195,7 @@
                         document.getElementById('loading').classList.add('hidden');
                         filterProducts();
                     },
-                    error: function(err) { 
-                        console.error(err);
-                        alert("Lỗi tải dữ liệu! Hãy kiểm tra lại link CSV có https:// chưa."); 
-                    }
+                    error: function() { alert("Lỗi tải dữ liệu! Hãy kiểm tra đường truyền."); }
                 });
             }
         }
@@ -255,7 +227,7 @@
             });
         }
 
-        // --- LOGIC MODAL 3D FLIP ---
+        // --- LOGIC MODAL 3D MỚI ---
         function openModal(pid) {
             const p = allProducts.find(i => i.id === pid);
             if (!p) return;
@@ -263,15 +235,14 @@
             const modal = document.getElementById('productModal');
             const flipInner = document.getElementById('flipInner');
             
-            // Reset về mặt trước
+            // Reset
             flipInner.classList.remove('do-flip');
 
             // Gán ảnh
             document.getElementById('modalImgFront').src = p.images[0];
-            // Nếu có ảnh 2 thì gán, không thì lấy ảnh 1
             document.getElementById('modalImgBack').src = p.images[1] ? p.images[1] : p.images[0];
 
-            // Điền thông tin
+            // Info
             document.getElementById('modalCode').innerText = p.code;
             document.getElementById('modalName').innerText = p.name;
             
