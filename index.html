@@ -47,15 +47,12 @@
         .modal-content { transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); transform: scale(0.9); opacity: 0; }
         #productModal.open .modal-content { transform: scale(1); opacity: 1; }
 
-        /* --- ẢNH TRONG MODAL (SLIDER) --- */
+        /* --- SLIDER ẢNH --- */
         .modal-img-container { position: relative; overflow: hidden; border-radius: 0.75rem; }
-        #modalImg { 
-            transition: opacity 0.3s ease, transform 0.3s ease; 
-            opacity: 1;
-        }
-        .fade-anim { opacity: 0.4 !important; transform: scale(0.98); } /* Hiệu ứng khi chuyển ảnh */
+        #modalImg { transition: opacity 0.3s ease, transform 0.3s ease; opacity: 1; }
+        .fade-anim { opacity: 0.4 !important; transform: scale(0.98); } 
 
-        /* Dots (Dấu chấm chỉ trang) */
+        /* Dots */
         .dots-container {
             position: absolute; bottom: 10px; left: 0; width: 100%;
             display: flex; justify-content: center; gap: 6px; pointer-events: none;
@@ -67,8 +64,6 @@
         .cat-btn.active { color: #fed7aa; border-bottom: 2px solid #fed7aa; }
         #socialToast { transform: translateY(100px); opacity: 0; transition: all 0.5s cubic-bezier(0.68, -0.55, 0.27, 1.55); }
         #socialToast.show { transform: translateY(0); opacity: 1; }
-        .wheel-container { position: relative; width: 280px; height: 280px; border-radius: 50%; border: 4px solid #333; background: conic-gradient(#ef4444 0deg 60deg, #14b8a6 60deg 120deg, #ef4444 120deg 180deg, #14b8a6 180deg 240deg, #ef4444 240deg 300deg, #14b8a6 300deg 360deg); transition: transform 4s cubic-bezier(0.17, 0.67, 0.12, 0.99); }
-        .wheel-pointer { position: absolute; top: -15px; left: 50%; transform: translateX(-50%); border-left: 15px solid transparent; border-right: 15px solid transparent; border-top: 25px solid #fff; z-index: 10; }
     </style>
 </head>
 <body class="pb-24 min-h-screen flex flex-col">
@@ -112,34 +107,21 @@
         </div>
     </div>
 
-    <!-- MODAL ZOOM (UPDATE: SLIDER 4 ẢNH) -->
+    <!-- MODAL ZOOM (SLIDER 5 ẢNH) -->
     <div id="productModal" class="fixed inset-0 z-[100] bg-black/95 hidden flex items-center justify-center px-4" onclick="closeModal()">
         <div class="modal-content w-full max-w-md flex flex-col items-center relative" onclick="event.stopPropagation()">
             <button onclick="closeModal()" class="absolute -top-12 right-0 text-white text-3xl z-50 p-2"><i class="fa-solid fa-xmark"></i></button>
 
-            <!-- Vùng ảnh Slider -->
             <div class="modal-img-container relative w-full aspect-[3/4] bg-[#111] border border-white/10 shadow-2xl cursor-pointer" onclick="nextModalImage()">
-                <!-- Ảnh chính -->
                 <img id="modalImg" src="" class="w-full h-full object-cover">
-                
-                <!-- Dấu chấm (Pagination) -->
-                <div id="modalDots" class="dots-container">
-                    <!-- JS sẽ tự tạo chấm vào đây -->
-                </div>
-
-                <!-- Chỉ dẫn -->
+                <div id="modalDots" class="dots-container"></div>
                 <div class="absolute top-3 right-3 text-white/80 bg-black/40 p-2 rounded-full pointer-events-none"><i class="fa-solid fa-images text-sm"></i></div>
-                <div class="absolute bottom-8 left-0 w-full text-center pointer-events-none">
-                    <span class="text-white/60 text-[10px] bg-black/50 px-3 py-1 rounded-full backdrop-blur-md"><i class="fa-solid fa-hand-pointer mr-1"></i> Chạm để xem tiếp</span>
-                </div>
-
-                <!-- Tim yêu thích -->
+                <div class="absolute bottom-8 left-0 w-full text-center pointer-events-none"><span class="text-white/60 text-[10px] bg-black/50 px-3 py-1 rounded-full backdrop-blur-md"><i class="fa-solid fa-hand-pointer mr-1"></i> Chạm để xem tiếp</span></div>
                 <button id="modalHeartBtn" class="absolute top-3 left-3 z-30 w-10 h-10 rounded-full bg-black/40 backdrop-blur text-white flex items-center justify-center hover:text-red-500 transition" onclick="event.stopPropagation(); toggleWishlistFromModal()">
                     <i class="fa-solid fa-heart text-lg"></i>
                 </button>
             </div>
 
-            <!-- Info & Buttons -->
             <div class="mt-6 w-full text-center">
                 <h2 id="modalCode" class="text-2xl font-bold text-white tracking-widest mb-1">CODE</h2>
                 <p id="modalName" class="text-gray-400 text-sm mb-6">Tên sản phẩm</p>
@@ -156,27 +138,9 @@
         </div>
     </div>
 
-    <!-- FLOATING -->
+    <!-- FLOATING BUTTON (TIKTOK ONLY) -->
     <div class="fixed bottom-6 right-4 flex flex-col gap-3 z-[60]">
-        <button onclick="openWheel()" class="w-10 h-10 bg-gradient-to-br from-pink-600 to-purple-600 rounded-full shadow-lg text-white flex items-center justify-center animate-bounce"><i class="fa-solid fa-gift text-sm"></i></button>
-        <a href="https://www.tiktok.com/@didi0310" target="_blank" class="w-10 h-10 bg-black border border-gray-700 rounded-full shadow-lg text-white flex items-center justify-center hover:scale-110 transition"><i class="fa-brands fa-tiktok text-sm"></i></a>
-    </div>
-
-    <!-- WHEEL -->
-    <div id="wheelModal" class="fixed inset-0 z-[90] hidden flex items-center justify-center px-4 bg-black/90 backdrop-blur-sm">
-        <div class="bg-[#181818] w-full max-w-xs rounded-2xl p-6 border border-gray-800 flex flex-col items-center relative">
-            <button onclick="closeWheel()" class="absolute top-3 right-4 text-gray-500 hover:text-white"><i class="fa-solid fa-xmark"></i></button>
-            <h3 class="text-lg font-bold text-white mb-1">Vòng Quay May Mắn</h3>
-            <div class="relative mb-6 mt-4">
-                <div class="wheel-pointer"></div>
-                <div id="wheel" class="wheel-container relative">
-                    <span class="absolute top-10 right-10 text-white font-bold text-[10px] rotate-45">SALE</span>
-                    <span class="absolute top-10 left-10 text-white font-bold text-[10px] -rotate-45">MISS</span>
-                </div>
-                <button onclick="spinWheel()" id="spinBtn" class="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-12 h-12 bg-white text-black font-bold rounded-full text-xs shadow-lg border-2 border-gray-300 z-10">QUAY</button>
-            </div>
-            <div id="wheelResult" class="text-center h-6 text-sm font-bold text-teal-400"></div>
-        </div>
+        <a href="https://www.tiktok.com/@didi0310" target="_blank" class="w-12 h-12 bg-black border border-gray-700 rounded-full shadow-lg text-white flex items-center justify-center hover:scale-110 transition"><i class="fa-brands fa-tiktok text-lg"></i></a>
     </div>
 
     <!-- SCRIPT -->
@@ -184,7 +148,6 @@
         const USE_GOOGLE_SHEET = true; 
         const SHEET_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQJs9fScBM0g7yKHn2JC6fi5EK9T5uUyyr-oaQeIQkvKrT8v2NKi-8Bx3V0pugjeVXH3Gqtn1aCQTNh/pub?gid=0&single=true&output=csv'; 
         const GITHUB_IMAGE_BASE = "https://didi0310.github.io/Topshot/images/";
-        const IS_OUT_OF_STOCK = false; 
 
         let allProducts = [];
         let currentCategory = 'all';
@@ -199,26 +162,24 @@
                         allProducts = results.data.map((row, idx) => {
                             let imgs = [];
                             
-                            // --- 1. ĐỌC TẤT CẢ 5 CỘT ẢNH (UPDATE) ---
-                            // Hàm helper để xử lý link
+                            // Helper xử lý link
                             const processImg = (raw) => {
                                 if (!raw || raw.length < 2) return null;
                                 if (raw.includes('http')) return raw; 
                                 return GITHUB_IMAGE_BASE + raw + ".jpg";
                             };
 
+                            // --- LOGIC ĐỌC 5 ẢNH ---
                             const i1 = processImg(row.image1); if(i1) imgs.push(i1);
                             const i2 = processImg(row.image2); if(i2) imgs.push(i2);
-                            const i3 = processImg(row.image3); if(i3) imgs.push(i3); // Đọc thêm image3
-                            const i4 = processImg(row.image4); if(i4) imgs.push(i4); // Đọc thêm image4
-                            const i5 = processImg(row.image5); if(i5) imgs.push(i5); // Đọc thêm image5
-                            // Nếu sheet trống trơn, tự ghép theo Mã (Dự phòng)
+                            const i3 = processImg(row.image3); if(i3) imgs.push(i3);
+                            const i4 = processImg(row.image4); if(i4) imgs.push(i4);
+                            const i5 = processImg(row.image5); if(i5) imgs.push(i5);
+                            
+                            // Dự phòng nếu sheet rỗng (mặc định 2 ảnh)
                             if (imgs.length === 0 && row.code) {
                                 imgs.push(GITHUB_IMAGE_BASE + row.code + "-1.jpg");
                                 imgs.push(GITHUB_IMAGE_BASE + row.code + "-2.jpg");
-                                imgs.push(GITHUB_IMAGE_BASE + row.code + "-3.jpg");
-                                imgs.push(GITHUB_IMAGE_BASE + row.code + "-4.jpg");
-                                imgs.push(GITHUB_IMAGE_BASE + row.code + "-5.jpg");
                             }
 
                             return {
@@ -226,11 +187,11 @@
                                 code: row.code || '???',
                                 category: row.category ? row.category.toLowerCase().trim() : 'khac',
                                 name: row.name || 'Sản phẩm mới',
-                                images: imgs,
+                                images: imgs, // Mảng này chứa đúng số lượng ảnh bạn nhập (1, 2, 3, 4 hoặc 5)
                                 isHot: (row.is_hot === 'TRUE'),
                                 links: { 
-                                    shopee: row.shopee_link, // Trả về nguyên bản (có thể rỗng)
-                                    tiktok: row.tiktok_link  // Trả về nguyên bản
+                                    shopee: row.shopee_link, 
+                                    tiktok: row.tiktok_link  
                                 }
                             };
                         });
@@ -271,7 +232,7 @@
             });
         }
 
-        // --- MODAL SLIDER LOGIC ---
+        // --- SLIDER LOGIC ---
         let currentModalProductId = null;
         let currentImgIndex = 0;
 
@@ -279,10 +240,10 @@
             const p = allProducts.find(i => i.id === pid);
             if (!p) return;
             currentModalProductId = pid;
-            currentImgIndex = 0; // Reset về ảnh đầu tiên
+            currentImgIndex = 0;
 
             const modal = document.getElementById('productModal');
-            updateModalImage(p); // Cập nhật ảnh và dots
+            updateModalImage(p);
 
             document.getElementById('modalCode').innerText = p.code;
             document.getElementById('modalName').innerText = p.name;
@@ -290,7 +251,7 @@
             const btnShopee = document.getElementById('modalShopee');
             const btnTiktok = document.getElementById('modalTiktok');
             
-            // --- 2. LOGIC ẨN NÚT NẾU KHÔNG CÓ LINK ---
+            // Ẩn nút nếu ko có link
             if (p.links.shopee && p.links.shopee.length > 1) {
                 btnShopee.href = p.links.shopee;
                 btnShopee.classList.remove('hidden');
@@ -305,7 +266,6 @@
                 btnTiktok.classList.add('hidden');
             }
 
-            // Tim yêu thích
             const isLiked = wishlist.includes(pid);
             const modalHeartBtn = document.getElementById('modalHeartBtn');
             const modalHeartIcon = modalHeartBtn.querySelector('i');
@@ -320,12 +280,8 @@
             if (currentModalProductId === null) return;
             const p = allProducts.find(i => i.id === currentModalProductId);
             if (!p || p.images.length <= 1) return;
-
-            // Tăng index, nếu hết thì quay về 0
             currentImgIndex = (currentImgIndex + 1) % p.images.length;
-            
             const imgTag = document.getElementById('modalImg');
-            // Hiệu ứng fade nhẹ
             imgTag.classList.add('fade-anim');
             setTimeout(() => {
                 updateModalImage(p);
@@ -334,10 +290,7 @@
         }
 
         function updateModalImage(p) {
-            // Cập nhật src ảnh
             document.getElementById('modalImg').src = p.images[currentImgIndex];
-            
-            // Cập nhật Dots (Dấu chấm)
             const dotsContainer = document.getElementById('modalDots');
             dotsContainer.innerHTML = '';
             if (p.images.length > 1) {
@@ -408,8 +361,7 @@
             filterProducts();
         }
 
-        // --- SOCIAL PROOF & WHEEL ---
-        const tiktokUsers = ["thuy.linh95", "ngoc_anh_2k", "trang_beo", "minh_thu_uct", "ha_vi_vi", "be_na_cutie", "thanh.huyen", "linh_ka", "mai_anh_dao", "user_b123", "quynh_aka", "tho_ngoc", "huyen_baby", "tram_anh_99", "ngan_sat_thu", "phuong_ly", "nhu_quynh", "bao_han_hel", "my_duyen", "thu_thao_off", "user9981", "kim_chi_cuc", "ha_linh_official", "thuy_tien", "ngoc_trinh", "hien_ho", "hoa_minzy", "huong_giang", "user_new", "diep_chi"];
+        const tiktokUsers = ["thuy.linh95", "ngoc_anh_2k", "trang_beo", "minh_thu_uct", "ha_vi_vi", "be_na_cutie", "thanh.huyen", "linh_ka", "mai_anh_dao", "user_b123", "quynh_aka", "tho_ngoc", "huyen_baby", "tram_anh_99", "ngan_sat_thu", "phuong_ly", "nhu_quynh", "bao_han_hel", "my_duyen", "thu_thao_off", "user9981", "kim_chi_cuc", "ha_linh99", "thuy_tien", "ngoc_trinh253", "hien_ho", "hoa_0311", "huong_giangla", "user_new", "diep_chi"];
         const actions = ["Vừa đặt hàng", "Đã mua", "Đã chốt đơn", "Vừa đánh giá 5 sao", "Săn được Deal hời"];
 
         function startSocialProof() {
@@ -433,24 +385,6 @@
             toastAction.innerText = action;
             toast.classList.add('show');
             setTimeout(() => { toast.classList.remove('show'); }, 4000);
-        }
-
-        function openWheel() { document.getElementById('wheelModal').classList.remove('hidden'); }
-        function closeWheel() { document.getElementById('wheelModal').classList.add('hidden'); }
-        let isSpinning = false;
-        function spinWheel() {
-            if (isSpinning) return;
-            isSpinning = true;
-            const wheel = document.getElementById('wheel');
-            const result = document.getElementById('wheelResult');
-            result.innerText = "...";
-            let stopDegree = IS_OUT_OF_STOCK ? 360 * 5 + (Math.random() * 40 + 10) : 360 * 5 + (Math.random() * 40 + 70);
-            wheel.style.transform = `rotate(-${stopDegree}deg)`;
-            setTimeout(() => {
-                isSpinning = true;
-                result.innerText = IS_OUT_OF_STOCK ? "Chúc bạn may mắn lần sau!" : "Trúng Voucher: FREESHIP";
-                if(!IS_OUT_OF_STOCK) { setTimeout(() => { navigator.clipboard.writeText("FREESHIP"); alert("Đã copy mã: FREESHIP"); closeWheel(); }, 1500); }
-            }, 4000);
         }
 
         init();
