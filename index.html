@@ -14,10 +14,7 @@
         @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&display=swap');
         body { 
             font-family: 'Outfit', sans-serif; 
-            background-color: #0f0f0f;
-            color: #e5e5e5;
-            
-            /* Nền Gradient động (Code của bạn rất đẹp!) */
+            background-color: #0f0f0f; color: #e5e5e5;
             background-image: 
                 radial-gradient(at 0% 0%, hsla(253,16%,7%,1) 0, transparent 50%), 
                 radial-gradient(at 50% 0%, hsla(225,39%,30%,1) 0, transparent 50%), 
@@ -26,19 +23,14 @@
             animation: gradientBG 15s ease infinite;
             min-height: 100vh;
         }
-
-        @keyframes gradientBG {
-            0% { background-position: 0% 50%; }
-            50% { background-position: 100% 50%; }
-            100% { background-position: 0% 50%; }
-        }
+        @keyframes gradientBG { 0% { background-position: 0% 50%; } 50% { background-position: 100% 50%; } 100% { background-position: 0% 50%; } }
         .no-scrollbar::-webkit-scrollbar { display: none; }
 
         /* --- GRID CARD --- */
         .product-card { transition: transform 0.2s; cursor: pointer; -webkit-tap-highlight-color: transparent; }
         .product-card:active { transform: scale(0.97); }
         
-        /* Trái tim yêu thích */
+        /* Heart Icon */
         .heart-btn {
             position: absolute; top: 8px; right: 8px; z-index: 30;
             background: rgba(0,0,0,0.4); backdrop-filter: blur(4px);
@@ -55,28 +47,26 @@
         .modal-content { transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); transform: scale(0.9); opacity: 0; }
         #productModal.open .modal-content { transform: scale(1); opacity: 1; }
 
-        /* --- 3D FLIP --- */
-        .perspective-1000 { perspective: 1000px; }
-        #flipInner {
-            position: relative; width: 100%; height: 100%; text-align: center;
-            transition: transform 0.8s cubic-bezier(0.4, 0, 0.2, 1); transform-style: preserve-3d;
+        /* --- ẢNH TRONG MODAL (SLIDER) --- */
+        .modal-img-container { position: relative; overflow: hidden; border-radius: 0.75rem; }
+        #modalImg { 
+            transition: opacity 0.3s ease, transform 0.3s ease; 
+            opacity: 1;
         }
-        .do-flip { transform: rotateY(180deg); }
-        .flip-face {
-            position: absolute; inset: 0; width: 100%; height: 100%;
-            -webkit-backface-visibility: hidden; backface-visibility: hidden;
-            border-radius: 0.75rem; overflow: hidden;
-        }
-        .flip-back { transform: rotateY(180deg); }
+        .fade-anim { opacity: 0.4 !important; transform: scale(0.98); } /* Hiệu ứng khi chuyển ảnh */
 
-        /* --- SOCIAL PROOF --- */
-        #socialToast {
-            transform: translateY(100px); opacity: 0; transition: all 0.5s cubic-bezier(0.68, -0.55, 0.27, 1.55);
+        /* Dots (Dấu chấm chỉ trang) */
+        .dots-container {
+            position: absolute; bottom: 10px; left: 0; width: 100%;
+            display: flex; justify-content: center; gap: 6px; pointer-events: none;
         }
-        #socialToast.show { transform: translateY(0); opacity: 1; }
+        .dot { width: 6px; height: 6px; background: rgba(255,255,255,0.3); border-radius: 50%; transition: all 0.3s; }
+        .dot.active { background: white; width: 12px; }
 
         /* --- UI KHÁC --- */
         .cat-btn.active { color: #fed7aa; border-bottom: 2px solid #fed7aa; }
+        #socialToast { transform: translateY(100px); opacity: 0; transition: all 0.5s cubic-bezier(0.68, -0.55, 0.27, 1.55); }
+        #socialToast.show { transform: translateY(0); opacity: 1; }
         .wheel-container { position: relative; width: 280px; height: 280px; border-radius: 50%; border: 4px solid #333; background: conic-gradient(#ef4444 0deg 60deg, #14b8a6 60deg 120deg, #ef4444 120deg 180deg, #14b8a6 180deg 240deg, #ef4444 240deg 300deg, #14b8a6 300deg 360deg); transition: transform 4s cubic-bezier(0.17, 0.67, 0.12, 0.99); }
         .wheel-pointer { position: absolute; top: -15px; left: 50%; transform: translateX(-50%); border-left: 15px solid transparent; border-right: 15px solid transparent; border-top: 25px solid #fff; z-index: 10; }
     </style>
@@ -88,7 +78,7 @@
         <div class="max-w-md mx-auto px-4 flex justify-between items-center mb-4">
             <div class="text-lg font-bold tracking-[0.2em] text-white">DIDI<span class="text-orange-300">STUDIO</span></div>
             <div class="relative w-1/2">
-                <input type="text" id="searchInput" onkeyup="filterProducts()" placeholder="Tìm mã (A001)..." 
+                <input type="text" id="searchInput" onkeyup="filterProducts()" placeholder="Tìm mã..." 
                     class="w-full bg-[#1a1a1a] text-white text-xs rounded-full pl-8 pr-4 py-2 focus:outline-none border border-gray-800 focus:border-orange-300/50 transition-colors placeholder-gray-600">
                 <i class="fa-solid fa-search absolute left-3 top-2.5 text-gray-500 text-[10px]"></i>
             </div>
@@ -122,29 +112,34 @@
         </div>
     </div>
 
-    <!-- MODAL ZOOM -->
+    <!-- MODAL ZOOM (UPDATE: SLIDER 4 ẢNH) -->
     <div id="productModal" class="fixed inset-0 z-[100] bg-black/95 hidden flex items-center justify-center px-4" onclick="closeModal()">
         <div class="modal-content w-full max-w-md flex flex-col items-center relative" onclick="event.stopPropagation()">
             <button onclick="closeModal()" class="absolute -top-12 right-0 text-white text-3xl z-50 p-2"><i class="fa-solid fa-xmark"></i></button>
 
-            <!-- 3D Flip -->
-            <div class="perspective-1000 relative w-full aspect-[3/4] cursor-pointer" onclick="flipModalImage()">
-                <div id="flipInner">
-                    <div class="flip-face bg-[#111] border border-white/10 shadow-2xl">
-                        <img id="modalImgFront" src="" class="w-full h-full object-cover">
-                        <div class="absolute bottom-4 left-0 w-full text-center pointer-events-none"><span class="text-white/60 text-[10px] bg-black/50 px-3 py-1 rounded-full backdrop-blur-md"><i class="fa-solid fa-hand-pointer mr-1"></i> Chạm để lật</span></div>
-                    </div>
-                    <div class="flip-face flip-back bg-[#111] border border-white/10 shadow-2xl">
-                        <img id="modalImgBack" src="" class="w-full h-full object-cover">
-                        <div class="absolute bottom-4 left-0 w-full text-center pointer-events-none"><span class="text-white/60 text-[10px] bg-black/50 px-3 py-1 rounded-full backdrop-blur-md"><i class="fa-solid fa-rotate-left mr-1"></i> Chạm để quay lại</span></div>
-                    </div>
+            <!-- Vùng ảnh Slider -->
+            <div class="modal-img-container relative w-full aspect-[3/4] bg-[#111] border border-white/10 shadow-2xl cursor-pointer" onclick="nextModalImage()">
+                <!-- Ảnh chính -->
+                <img id="modalImg" src="" class="w-full h-full object-cover">
+                
+                <!-- Dấu chấm (Pagination) -->
+                <div id="modalDots" class="dots-container">
+                    <!-- JS sẽ tự tạo chấm vào đây -->
                 </div>
-                <button id="modalHeartBtn" class="absolute top-3 right-3 z-30 w-10 h-10 rounded-full bg-black/40 backdrop-blur text-white flex items-center justify-center hover:text-red-500 transition" onclick="event.stopPropagation(); toggleWishlistFromModal()">
+
+                <!-- Chỉ dẫn -->
+                <div class="absolute top-3 right-3 text-white/80 bg-black/40 p-2 rounded-full pointer-events-none"><i class="fa-solid fa-images text-sm"></i></div>
+                <div class="absolute bottom-8 left-0 w-full text-center pointer-events-none">
+                    <span class="text-white/60 text-[10px] bg-black/50 px-3 py-1 rounded-full backdrop-blur-md"><i class="fa-solid fa-hand-pointer mr-1"></i> Chạm để xem tiếp</span>
+                </div>
+
+                <!-- Tim yêu thích -->
+                <button id="modalHeartBtn" class="absolute top-3 left-3 z-30 w-10 h-10 rounded-full bg-black/40 backdrop-blur text-white flex items-center justify-center hover:text-red-500 transition" onclick="event.stopPropagation(); toggleWishlistFromModal()">
                     <i class="fa-solid fa-heart text-lg"></i>
                 </button>
             </div>
 
-            <!-- Info -->
+            <!-- Info & Buttons -->
             <div class="mt-6 w-full text-center">
                 <h2 id="modalCode" class="text-2xl font-bold text-white tracking-widest mb-1">CODE</h2>
                 <p id="modalName" class="text-gray-400 text-sm mb-6">Tên sản phẩm</p>
@@ -164,9 +159,10 @@
     <!-- FLOATING -->
     <div class="fixed bottom-6 right-4 flex flex-col gap-3 z-[60]">
         <button onclick="openWheel()" class="w-10 h-10 bg-gradient-to-br from-pink-600 to-purple-600 rounded-full shadow-lg text-white flex items-center justify-center animate-bounce"><i class="fa-solid fa-gift text-sm"></i></button>
-        <a href="https://www.tiktok.com/@username" target="_blank" class="w-10 h-10 bg-black border border-gray-700 rounded-full shadow-lg text-white flex items-center justify-center hover:scale-110 transition"><i class="fa-brands fa-tiktok text-sm"></i></a>
+        <a href="https://www.tiktok.com/@didi0310" target="_blank" class="w-10 h-10 bg-black border border-gray-700 rounded-full shadow-lg text-white flex items-center justify-center hover:scale-110 transition"><i class="fa-brands fa-tiktok text-sm"></i></a>
     </div>
 
+    <!-- WHEEL -->
     <div id="wheelModal" class="fixed inset-0 z-[90] hidden flex items-center justify-center px-4 bg-black/90 backdrop-blur-sm">
         <div class="bg-[#181818] w-full max-w-xs rounded-2xl p-6 border border-gray-800 flex flex-col items-center relative">
             <button onclick="closeWheel()" class="absolute top-3 right-4 text-gray-500 hover:text-white"><i class="fa-solid fa-xmark"></i></button>
@@ -186,10 +182,7 @@
     <!-- SCRIPT -->
     <script>
         const USE_GOOGLE_SHEET = true; 
-        // LINK CSV GOOGLE SHEET
         const SHEET_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQJs9fScBM0g7yKHn2JC6fi5EK9T5uUyyr-oaQeIQkvKrT8v2NKi-8Bx3V0pugjeVXH3Gqtn1aCQTNh/pub?gid=0&single=true&output=csv'; 
-        
-        // --- CẤU HÌNH GITHUB MỚI CỦA BẠN ---
         const GITHUB_IMAGE_BASE = "https://didi0310.github.io/Topshot/images/";
         const IS_OUT_OF_STOCK = false; 
 
@@ -206,15 +199,26 @@
                         allProducts = results.data.map((row, idx) => {
                             let imgs = [];
                             
-                            // 1. Ưu tiên link trong sheet
-                            if (row.image1 && row.image1.length > 5) imgs.push(row.image1);
-                            if (row.image2 && row.image2.length > 5) imgs.push(row.image2);
-                            
-                            // 2. Tự ghép link GitHub (Sử dụng .jpg cho phổ biến)
-                            // QUAN TRỌNG: Trong Google Sheet cột code điền "A001", thì ảnh phải là "A001-1.jpg"
+                            // --- 1. ĐỌC TẤT CẢ 5 CỘT ẢNH (UPDATE) ---
+                            // Hàm helper để xử lý link
+                            const processImg = (raw) => {
+                                if (!raw || raw.length < 2) return null;
+                                if (raw.includes('http')) return raw; 
+                                return GITHUB_IMAGE_BASE + raw + ".jpg";
+                            };
+
+                            const i1 = processImg(row.image1); if(i1) imgs.push(i1);
+                            const i2 = processImg(row.image2); if(i2) imgs.push(i2);
+                            const i3 = processImg(row.image3); if(i3) imgs.push(i3); // Đọc thêm image3
+                            const i4 = processImg(row.image4); if(i4) imgs.push(i4); // Đọc thêm image4
+                            const i5 = processImg(row.image5); if(i5) imgs.push(i5); // Đọc thêm image5
+                            // Nếu sheet trống trơn, tự ghép theo Mã (Dự phòng)
                             if (imgs.length === 0 && row.code) {
                                 imgs.push(GITHUB_IMAGE_BASE + row.code + "-1.jpg");
                                 imgs.push(GITHUB_IMAGE_BASE + row.code + "-2.jpg");
+                                imgs.push(GITHUB_IMAGE_BASE + row.code + "-3.jpg");
+                                imgs.push(GITHUB_IMAGE_BASE + row.code + "-4.jpg");
+                                imgs.push(GITHUB_IMAGE_BASE + row.code + "-5.jpg");
                             }
 
                             return {
@@ -224,10 +228,9 @@
                                 name: row.name || 'Sản phẩm mới',
                                 images: imgs,
                                 isHot: (row.is_hot === 'TRUE'),
-                                // Fix lỗi ẩn nút: Luôn hiện nút dù không có link
                                 links: { 
-                                    shopee: row.shopee_link || "#", 
-                                    tiktok: row.tiktok_link || "#" 
+                                    shopee: row.shopee_link, // Trả về nguyên bản (có thể rỗng)
+                                    tiktok: row.tiktok_link  // Trả về nguyên bản
                                 }
                             };
                         });
@@ -244,16 +247,13 @@
             const container = document.getElementById('productList');
             const empty = document.getElementById('emptyState');
             container.innerHTML = '';
-
             if(data.length === 0) { empty.classList.remove('hidden'); return; }
             empty.classList.add('hidden');
-            
             data.forEach(p => {
                 const img1 = p.images[0];
                 const isLiked = wishlist.includes(p.id);
                 const heartClass = isLiked ? 'active' : '';
                 const heartIcon = isLiked ? 'fa-solid fa-heart' : 'fa-regular fa-heart';
-
                 const html = `
                     <div class="product-card relative rounded-lg overflow-hidden border border-white/5 shadow-lg group">
                         <div class="aspect-[3/4] bg-[#111] relative" onclick="openModal(${p.id})">
@@ -264,13 +264,101 @@
                             </div>
                             ${p.isHot ? '<div class="absolute top-2 left-2 text-orange-500 animate-pulse"><i class="fa-solid fa-fire"></i></div>' : ''}
                         </div>
-                        <button class="heart-btn ${heartClass}" onclick="toggleWishlist(${p.id}, this)">
-                            <i class="${heartIcon} text-sm"></i>
-                        </button>
+                        <button class="heart-btn ${heartClass}" onclick="toggleWishlist(${p.id}, this)"><i class="${heartIcon} text-sm"></i></button>
                     </div>
                 `;
                 container.innerHTML += html;
             });
+        }
+
+        // --- MODAL SLIDER LOGIC ---
+        let currentModalProductId = null;
+        let currentImgIndex = 0;
+
+        function openModal(pid) {
+            const p = allProducts.find(i => i.id === pid);
+            if (!p) return;
+            currentModalProductId = pid;
+            currentImgIndex = 0; // Reset về ảnh đầu tiên
+
+            const modal = document.getElementById('productModal');
+            updateModalImage(p); // Cập nhật ảnh và dots
+
+            document.getElementById('modalCode').innerText = p.code;
+            document.getElementById('modalName').innerText = p.name;
+            
+            const btnShopee = document.getElementById('modalShopee');
+            const btnTiktok = document.getElementById('modalTiktok');
+            
+            // --- 2. LOGIC ẨN NÚT NẾU KHÔNG CÓ LINK ---
+            if (p.links.shopee && p.links.shopee.length > 1) {
+                btnShopee.href = p.links.shopee;
+                btnShopee.classList.remove('hidden');
+            } else {
+                btnShopee.classList.add('hidden');
+            }
+
+            if (p.links.tiktok && p.links.tiktok.length > 1) {
+                btnTiktok.href = p.links.tiktok;
+                btnTiktok.classList.remove('hidden');
+            } else {
+                btnTiktok.classList.add('hidden');
+            }
+
+            // Tim yêu thích
+            const isLiked = wishlist.includes(pid);
+            const modalHeartBtn = document.getElementById('modalHeartBtn');
+            const modalHeartIcon = modalHeartBtn.querySelector('i');
+            if (isLiked) { modalHeartIcon.classList.remove('fa-regular'); modalHeartIcon.classList.add('fa-solid', 'text-red-500'); } 
+            else { modalHeartIcon.classList.remove('fa-solid', 'text-red-500'); modalHeartIcon.classList.add('fa-regular'); }
+
+            modal.classList.remove('hidden');
+            setTimeout(() => { modal.classList.add('open'); }, 10);
+        }
+
+        function nextModalImage() {
+            if (currentModalProductId === null) return;
+            const p = allProducts.find(i => i.id === currentModalProductId);
+            if (!p || p.images.length <= 1) return;
+
+            // Tăng index, nếu hết thì quay về 0
+            currentImgIndex = (currentImgIndex + 1) % p.images.length;
+            
+            const imgTag = document.getElementById('modalImg');
+            // Hiệu ứng fade nhẹ
+            imgTag.classList.add('fade-anim');
+            setTimeout(() => {
+                updateModalImage(p);
+                imgTag.classList.remove('fade-anim');
+            }, 200);
+        }
+
+        function updateModalImage(p) {
+            // Cập nhật src ảnh
+            document.getElementById('modalImg').src = p.images[currentImgIndex];
+            
+            // Cập nhật Dots (Dấu chấm)
+            const dotsContainer = document.getElementById('modalDots');
+            dotsContainer.innerHTML = '';
+            if (p.images.length > 1) {
+                p.images.forEach((_, idx) => {
+                    const dot = document.createElement('div');
+                    dot.className = `dot ${idx === currentImgIndex ? 'active' : ''}`;
+                    dotsContainer.appendChild(dot);
+                });
+            }
+        }
+
+        function toggleWishlistFromModal() {
+            if (currentModalProductId !== null) {
+                toggleWishlist(currentModalProductId);
+                const isLiked = wishlist.includes(currentModalProductId);
+                const modalHeartBtn = document.getElementById('modalHeartBtn');
+                const modalHeartIcon = modalHeartBtn.querySelector('i');
+                if (isLiked) { modalHeartIcon.classList.remove('fa-regular'); modalHeartIcon.classList.add('fa-solid', 'text-red-500'); } 
+                else { modalHeartIcon.classList.remove('fa-solid', 'text-red-500'); modalHeartIcon.classList.add('fa-regular'); }
+                if (currentCategory !== 'wishlist') filterProducts(); 
+            }
         }
 
         function toggleWishlist(id, btn) {
@@ -286,6 +374,26 @@
             if (currentCategory === 'wishlist') { filterProducts(); }
         }
 
+        function closeModal() {
+            const modal = document.getElementById('productModal');
+            modal.classList.remove('open');
+            setTimeout(() => { modal.classList.add('hidden'); }, 200);
+            if (currentCategory === 'wishlist') filterProducts();
+        }
+
+        function filterProducts() {
+            const key = document.getElementById('searchInput').value.toLowerCase();
+            const filtered = allProducts.filter(p => {
+                const matchKey = p.name.toLowerCase().includes(key) || p.code.toLowerCase().includes(key);
+                let matchCat = false;
+                if (currentCategory === 'all') matchCat = true;
+                else if (currentCategory === 'wishlist') matchCat = wishlist.includes(p.id);
+                else matchCat = p.category === currentCategory;
+                return matchKey && matchCat;
+            });
+            renderProducts(filtered);
+        }
+
         function filterWishlist() {
             currentCategory = 'wishlist';
             document.querySelectorAll('.cat-btn').forEach(btn => btn.classList.remove('active'));
@@ -293,6 +401,14 @@
             filterProducts();
         }
 
+        function setCategory(catId) {
+            currentCategory = catId;
+            document.querySelectorAll('.cat-btn').forEach(btn => btn.classList.remove('active'));
+            event.target.classList.add('active');
+            filterProducts();
+        }
+
+        // --- SOCIAL PROOF & WHEEL ---
         const tiktokUsers = ["thuy.linh95", "ngoc_anh_2k", "trang_beo", "minh_thu_uct", "ha_vi_vi", "be_na_cutie", "thanh.huyen", "linh_ka", "mai_anh_dao", "user_b123", "quynh_aka", "tho_ngoc", "huyen_baby", "tram_anh_99", "ngan_sat_thu", "phuong_ly", "nhu_quynh", "bao_han_hel", "my_duyen", "thu_thao_off", "user9981", "kim_chi_cuc", "ha_linh_official", "thuy_tien", "ngoc_trinh", "hien_ho", "hoa_minzy", "huong_giang", "user_new", "diep_chi"];
         const actions = ["Vừa đặt hàng", "Đã mua", "Đã chốt đơn", "Vừa đánh giá 5 sao", "Săn được Deal hời"];
 
@@ -319,78 +435,6 @@
             setTimeout(() => { toast.classList.remove('show'); }, 4000);
         }
 
-        let currentModalProductId = null;
-        function openModal(pid) {
-            const p = allProducts.find(i => i.id === pid);
-            if (!p) return;
-            currentModalProductId = pid;
-            const modal = document.getElementById('productModal');
-            const flipInner = document.getElementById('flipInner');
-            flipInner.classList.remove('do-flip');
-            document.getElementById('modalImgFront').src = p.images[0];
-            document.getElementById('modalImgBack').src = p.images[1] ? p.images[1] : p.images[0];
-            document.getElementById('modalCode').innerText = p.code;
-            document.getElementById('modalName').innerText = p.name;
-            
-            const btnShopee = document.getElementById('modalShopee');
-            const btnTiktok = document.getElementById('modalTiktok');
-            
-            // Fix hiện nút
-            btnShopee.href = p.links.shopee;
-            btnShopee.classList.remove('hidden');
-            btnTiktok.href = p.links.tiktok;
-            btnTiktok.classList.remove('hidden');
-
-            const isLiked = wishlist.includes(pid);
-            const modalHeartBtn = document.getElementById('modalHeartBtn');
-            const modalHeartIcon = modalHeartBtn.querySelector('i');
-            if (isLiked) { modalHeartIcon.classList.remove('fa-regular'); modalHeartIcon.classList.add('fa-solid', 'text-red-500'); } 
-            else { modalHeartIcon.classList.remove('fa-solid', 'text-red-500'); modalHeartIcon.classList.add('fa-regular'); }
-
-            modal.classList.remove('hidden');
-            setTimeout(() => { modal.classList.add('open'); }, 10);
-        }
-
-        function toggleWishlistFromModal() {
-            if (currentModalProductId !== null) {
-                toggleWishlist(currentModalProductId);
-                const isLiked = wishlist.includes(currentModalProductId);
-                const modalHeartBtn = document.getElementById('modalHeartBtn');
-                const modalHeartIcon = modalHeartBtn.querySelector('i');
-                if (isLiked) { modalHeartIcon.classList.remove('fa-regular'); modalHeartIcon.classList.add('fa-solid', 'text-red-500'); } 
-                else { modalHeartIcon.classList.remove('fa-solid', 'text-red-500'); modalHeartIcon.classList.add('fa-regular'); }
-                if (currentCategory !== 'wishlist') filterProducts(); 
-            }
-        }
-
-        function closeModal() {
-            const modal = document.getElementById('productModal');
-            modal.classList.remove('open');
-            setTimeout(() => { modal.classList.add('hidden'); }, 200);
-            if (currentCategory === 'wishlist') filterProducts();
-        }
-        function flipModalImage() { document.getElementById('flipInner').classList.toggle('do-flip'); }
-
-        function filterProducts() {
-            const key = document.getElementById('searchInput').value.toLowerCase();
-            const filtered = allProducts.filter(p => {
-                const matchKey = p.name.toLowerCase().includes(key) || p.code.toLowerCase().includes(key);
-                let matchCat = false;
-                if (currentCategory === 'all') matchCat = true;
-                else if (currentCategory === 'wishlist') matchCat = wishlist.includes(p.id);
-                else matchCat = p.category === currentCategory;
-                return matchKey && matchCat;
-            });
-            renderProducts(filtered);
-        }
-
-        function setCategory(catId) {
-            currentCategory = catId;
-            document.querySelectorAll('.cat-btn').forEach(btn => btn.classList.remove('active'));
-            event.target.classList.add('active');
-            filterProducts();
-        }
-
         function openWheel() { document.getElementById('wheelModal').classList.remove('hidden'); }
         function closeWheel() { document.getElementById('wheelModal').classList.add('hidden'); }
         let isSpinning = false;
@@ -403,7 +447,7 @@
             let stopDegree = IS_OUT_OF_STOCK ? 360 * 5 + (Math.random() * 40 + 10) : 360 * 5 + (Math.random() * 40 + 70);
             wheel.style.transform = `rotate(-${stopDegree}deg)`;
             setTimeout(() => {
-                isSpinning = false;
+                isSpinning = true;
                 result.innerText = IS_OUT_OF_STOCK ? "Chúc bạn may mắn lần sau!" : "Trúng Voucher: FREESHIP";
                 if(!IS_OUT_OF_STOCK) { setTimeout(() => { navigator.clipboard.writeText("FREESHIP"); alert("Đã copy mã: FREESHIP"); closeWheel(); }, 1500); }
             }, 4000);
