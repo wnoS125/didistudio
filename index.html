@@ -13,25 +13,25 @@
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&display=swap');
         body { 
-    font-family: 'Outfit', sans-serif; 
-    background-color: #0f0f0f; /* Màu nền cơ bản */
-    color: #e5e5e5;
-    
-    /* Tạo hiệu ứng nền Gradient động */
-    background-image: 
-        radial-gradient(at 0% 0%, hsla(253,16%,7%,1) 0, transparent 50%), 
-        radial-gradient(at 50% 0%, hsla(225,39%,30%,1) 0, transparent 50%), 
-        radial-gradient(at 100% 0%, hsla(339,49%,30%,1) 0, transparent 50%);
-    background-size: 200% 200%;
-    animation: gradientBG 15s ease infinite; /* Chuyển động chậm 15s */
-    min-height: 100vh;
-}
+            font-family: 'Outfit', sans-serif; 
+            background-color: #0f0f0f;
+            color: #e5e5e5;
+            
+            /* Nền Gradient động (Code của bạn rất đẹp!) */
+            background-image: 
+                radial-gradient(at 0% 0%, hsla(253,16%,7%,1) 0, transparent 50%), 
+                radial-gradient(at 50% 0%, hsla(225,39%,30%,1) 0, transparent 50%), 
+                radial-gradient(at 100% 0%, hsla(339,49%,30%,1) 0, transparent 50%);
+            background-size: 200% 200%;
+            animation: gradientBG 15s ease infinite;
+            min-height: 100vh;
+        }
 
-@keyframes gradientBG {
-    0% { background-position: 0% 50%; }
-    50% { background-position: 100% 50%; }
-    100% { background-position: 0% 50%; }
-}
+        @keyframes gradientBG {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
         .no-scrollbar::-webkit-scrollbar { display: none; }
 
         /* --- GRID CARD --- */
@@ -69,7 +69,7 @@
         }
         .flip-back { transform: rotateY(180deg); }
 
-        /* --- SOCIAL PROOF (THÔNG BÁO ẢO) --- */
+        /* --- SOCIAL PROOF --- */
         #socialToast {
             transform: translateY(100px); opacity: 0; transition: all 0.5s cubic-bezier(0.68, -0.55, 0.27, 1.55);
         }
@@ -77,7 +77,6 @@
 
         /* --- UI KHÁC --- */
         .cat-btn.active { color: #fed7aa; border-bottom: 2px solid #fed7aa; }
-        /* Wheel animation */
         .wheel-container { position: relative; width: 280px; height: 280px; border-radius: 50%; border: 4px solid #333; background: conic-gradient(#ef4444 0deg 60deg, #14b8a6 60deg 120deg, #ef4444 120deg 180deg, #14b8a6 180deg 240deg, #ef4444 240deg 300deg, #14b8a6 300deg 360deg); transition: transform 4s cubic-bezier(0.17, 0.67, 0.12, 0.99); }
         .wheel-pointer { position: absolute; top: -15px; left: 50%; transform: translateX(-50%); border-left: 15px solid transparent; border-right: 15px solid transparent; border-top: 25px solid #fff; z-index: 10; }
     </style>
@@ -89,7 +88,7 @@
         <div class="max-w-md mx-auto px-4 flex justify-between items-center mb-4">
             <div class="text-lg font-bold tracking-[0.2em] text-white">DIDI<span class="text-orange-300">STUDIO</span></div>
             <div class="relative w-1/2">
-                <input type="text" id="searchInput" onkeyup="filterProducts()" placeholder="Tìm mã..." 
+                <input type="text" id="searchInput" onkeyup="filterProducts()" placeholder="Tìm mã (A001)..." 
                     class="w-full bg-[#1a1a1a] text-white text-xs rounded-full pl-8 pr-4 py-2 focus:outline-none border border-gray-800 focus:border-orange-300/50 transition-colors placeholder-gray-600">
                 <i class="fa-solid fa-search absolute left-3 top-2.5 text-gray-500 text-[10px]"></i>
             </div>
@@ -113,7 +112,7 @@
         <div id="emptyState" class="hidden text-center py-20 text-gray-600"><i class="fa-solid fa-ghost text-2xl mb-2"></i><p class="text-xs">Không tìm thấy sản phẩm</p></div>
     </main>
 
-    <!-- SOCIAL PROOF TOAST (USER TIKTOK) -->
+    <!-- SOCIAL PROOF -->
     <div id="socialToast" class="fixed bottom-24 left-4 z-50 bg-[#181818]/95 backdrop-blur border border-white/10 p-3 rounded-lg shadow-2xl flex items-center gap-3 max-w-[280px]">
         <div id="toastImg" class="w-10 h-10 rounded-full bg-gray-700 bg-cover bg-center flex items-center justify-center text-xs font-bold text-white"></div>
         <div>
@@ -131,12 +130,10 @@
             <!-- 3D Flip -->
             <div class="perspective-1000 relative w-full aspect-[3/4] cursor-pointer" onclick="flipModalImage()">
                 <div id="flipInner">
-                    <!-- Front -->
                     <div class="flip-face bg-[#111] border border-white/10 shadow-2xl">
                         <img id="modalImgFront" src="" class="w-full h-full object-cover">
                         <div class="absolute bottom-4 left-0 w-full text-center pointer-events-none"><span class="text-white/60 text-[10px] bg-black/50 px-3 py-1 rounded-full backdrop-blur-md"><i class="fa-solid fa-hand-pointer mr-1"></i> Chạm để lật</span></div>
                     </div>
-                    <!-- Back -->
                     <div class="flip-face flip-back bg-[#111] border border-white/10 shadow-2xl">
                         <img id="modalImgBack" src="" class="w-full h-full object-cover">
                         <div class="absolute bottom-4 left-0 w-full text-center pointer-events-none"><span class="text-white/60 text-[10px] bg-black/50 px-3 py-1 rounded-full backdrop-blur-md"><i class="fa-solid fa-rotate-left mr-1"></i> Chạm để quay lại</span></div>
@@ -147,7 +144,7 @@
                 </button>
             </div>
 
-            <!-- Info & Buttons -->
+            <!-- Info -->
             <div class="mt-6 w-full text-center">
                 <h2 id="modalCode" class="text-2xl font-bold text-white tracking-widest mb-1">CODE</h2>
                 <p id="modalName" class="text-gray-400 text-sm mb-6">Tên sản phẩm</p>
@@ -164,7 +161,7 @@
         </div>
     </div>
 
-    <!-- FLOATING & WHEEL -->
+    <!-- FLOATING -->
     <div class="fixed bottom-6 right-4 flex flex-col gap-3 z-[60]">
         <button onclick="openWheel()" class="w-10 h-10 bg-gradient-to-br from-pink-600 to-purple-600 rounded-full shadow-lg text-white flex items-center justify-center animate-bounce"><i class="fa-solid fa-gift text-sm"></i></button>
         <a href="https://www.tiktok.com/@username" target="_blank" class="w-10 h-10 bg-black border border-gray-700 rounded-full shadow-lg text-white flex items-center justify-center hover:scale-110 transition"><i class="fa-brands fa-tiktok text-sm"></i></a>
@@ -186,10 +183,13 @@
         </div>
     </div>
 
-    <!-- LOGIC JS -->
+    <!-- SCRIPT -->
     <script>
         const USE_GOOGLE_SHEET = true; 
+        // LINK CSV GOOGLE SHEET
         const SHEET_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQJs9fScBM0g7yKHn2JC6fi5EK9T5uUyyr-oaQeIQkvKrT8v2NKi-8Bx3V0pugjeVXH3Gqtn1aCQTNh/pub?gid=0&single=true&output=csv'; 
+        
+        // --- CẤU HÌNH GITHUB MỚI CỦA BẠN ---
         const GITHUB_IMAGE_BASE = "https://didi0310.github.io/Topshot/images/";
         const IS_OUT_OF_STOCK = false; 
 
@@ -205,12 +205,18 @@
                     complete: function(results) {
                         allProducts = results.data.map((row, idx) => {
                             let imgs = [];
+                            
+                            // 1. Ưu tiên link trong sheet
                             if (row.image1 && row.image1.length > 5) imgs.push(row.image1);
                             if (row.image2 && row.image2.length > 5) imgs.push(row.image2);
+                            
+                            // 2. Tự ghép link GitHub (Sử dụng .jpg cho phổ biến)
+                            // QUAN TRỌNG: Trong Google Sheet cột code điền "A001", thì ảnh phải là "A001-1.jpg"
                             if (imgs.length === 0 && row.code) {
-                                imgs.push(GITHUB_IMAGE_BASE + row.code + "-1.jpeg");
-                                imgs.push(GITHUB_IMAGE_BASE + row.code + "-2.jpeg");
+                                imgs.push(GITHUB_IMAGE_BASE + row.code + "-1.jpg");
+                                imgs.push(GITHUB_IMAGE_BASE + row.code + "-2.jpg");
                             }
+
                             return {
                                 id: idx,
                                 code: row.code || '???',
@@ -218,7 +224,11 @@
                                 name: row.name || 'Sản phẩm mới',
                                 images: imgs,
                                 isHot: (row.is_hot === 'TRUE'),
-                                links: { shopee: row.shopee_link, tiktok: row.tiktok_link }
+                                // Fix lỗi ẩn nút: Luôn hiện nút dù không có link
+                                links: { 
+                                    shopee: row.shopee_link || "#", 
+                                    tiktok: row.tiktok_link || "#" 
+                                }
                             };
                         });
                         document.getElementById('loading').classList.add('hidden');
@@ -270,7 +280,8 @@
             if (btn) {
                 const icon = btn.querySelector('i');
                 btn.classList.toggle('active');
-                if (btn.classList.contains('active')) { icon.classList.remove('fa-regular'); icon.classList.add('fa-solid', 'fa-heart'); } else { icon.classList.remove('fa-solid'); icon.classList.add('fa-regular'); }
+                if (btn.classList.contains('active')) { icon.classList.remove('fa-regular'); icon.classList.add('fa-solid', 'fa-heart'); } 
+                else { icon.classList.remove('fa-solid'); icon.classList.add('fa-regular'); }
             }
             if (currentCategory === 'wishlist') { filterProducts(); }
         }
@@ -282,24 +293,12 @@
             filterProducts();
         }
 
-        // --- SOCIAL PROOF (TIKTOK USERNAMES 30 CÁI) ---
-        const tiktokUsers = [
-            "thuy.linh95", "ngoc_anh_2k", "trang_beo", "minh_thu_uct", "ha_vi_vi",
-            "be_na_cutie", "thanh.huyen", "linh_ka", "mai_anh_dao", "user_b123",
-            "quynh_aka", "tho_ngoc", "huyen_baby", "tram_anh_99", "ngan_sat_thu",
-            "phuong_ly", "nhu_quynh", "bao_han_hel", "my_duyen", "thu_thao_off",
-            "user9981", "kim_chi_cuc", "ha_linh_official", "thuy_tien", "ngoc_trinh",
-            "hien_ho", "hoa_minzy", "huong_giang", "user_new", "diep_chi"
-        ];
-        
+        const tiktokUsers = ["thuy.linh95", "ngoc_anh_2k", "trang_beo", "minh_thu_uct", "ha_vi_vi", "be_na_cutie", "thanh.huyen", "linh_ka", "mai_anh_dao", "user_b123", "quynh_aka", "tho_ngoc", "huyen_baby", "tram_anh_99", "ngan_sat_thu", "phuong_ly", "nhu_quynh", "bao_han_hel", "my_duyen", "thu_thao_off", "user9981", "kim_chi_cuc", "ha_linh_official", "thuy_tien", "ngoc_trinh", "hien_ho", "hoa_minzy", "huong_giang", "user_new", "diep_chi"];
         const actions = ["Vừa đặt hàng", "Đã mua", "Đã chốt đơn", "Vừa đánh giá 5 sao", "Săn được Deal hời"];
 
         function startSocialProof() {
             const randomTime = Math.floor(Math.random() * (45000 - 15000 + 1)) + 15000;
-            setTimeout(() => {
-                showSocialToast();
-                startSocialProof();
-            }, randomTime);
+            setTimeout(() => { showSocialToast(); startSocialProof(); }, randomTime);
         }
 
         function showSocialToast() {
@@ -307,21 +306,15 @@
             const toastName = document.getElementById('toastName');
             const toastAction = document.getElementById('toastAction');
             const toastImg = document.getElementById('toastImg');
-
-            // Random User từ danh sách 30 cái
             const randomUser = tiktokUsers[Math.floor(Math.random() * tiktokUsers.length)];
-            const name = `@${randomUser}***`; // Thêm @ và che đuôi
+            const name = `@${randomUser}***`;
             const action = actions[Math.floor(Math.random() * actions.length)];
-            
-            // Avatar là chữ cái đầu
             const firstChar = randomUser.charAt(0).toUpperCase();
             const hue = Math.floor(Math.random() * 360);
-            
             toastImg.style.backgroundColor = `hsl(${hue}, 60%, 40%)`;
             toastImg.innerText = firstChar;
             toastName.innerText = name;
             toastAction.innerText = action;
-
             toast.classList.add('show');
             setTimeout(() => { toast.classList.remove('show'); }, 4000);
         }
@@ -331,11 +324,9 @@
             const p = allProducts.find(i => i.id === pid);
             if (!p) return;
             currentModalProductId = pid;
-
             const modal = document.getElementById('productModal');
             const flipInner = document.getElementById('flipInner');
             flipInner.classList.remove('do-flip');
-
             document.getElementById('modalImgFront').src = p.images[0];
             document.getElementById('modalImgBack').src = p.images[1] ? p.images[1] : p.images[0];
             document.getElementById('modalCode').innerText = p.code;
@@ -343,8 +334,12 @@
             
             const btnShopee = document.getElementById('modalShopee');
             const btnTiktok = document.getElementById('modalTiktok');
-            if (p.links.shopee) { btnShopee.href = p.links.shopee; btnShopee.classList.remove('hidden'); } else { btnShopee.classList.add('hidden'); }
-            if (p.links.tiktok) { btnTiktok.href = p.links.tiktok; btnTiktok.classList.remove('hidden'); } else { btnTiktok.classList.add('hidden'); }
+            
+            // Fix hiện nút
+            btnShopee.href = p.links.shopee;
+            btnShopee.classList.remove('hidden');
+            btnTiktok.href = p.links.tiktok;
+            btnTiktok.classList.remove('hidden');
 
             const isLiked = wishlist.includes(pid);
             const modalHeartBtn = document.getElementById('modalHeartBtn');
