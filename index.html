@@ -64,7 +64,51 @@
         .cat-btn.active { color: #fed7aa; border-bottom: 2px solid #fed7aa; }
         #socialToast { transform: translateY(100px); opacity: 0; transition: all 0.5s cubic-bezier(0.68, -0.55, 0.27, 1.55); }
         #socialToast.show { transform: translateY(0); opacity: 1; }
+        /* --- MUSIC PLAYER --- */
+.music-control {
+    position: fixed; bottom: 24px; left: 24px; z-index: 60;
+    width: 48px; height: 48px;
+    background: rgba(0,0,0,0.6); backdrop-filter: blur(5px);
+    border: 1px solid rgba(255,255,255,0.2);
+    border-radius: 50%; cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    transition: all 0.3s; overflow: hidden;
+}
+.music-control:active { transform: scale(0.95); }
+
+/* Đĩa than quay */
+.music-disc {
+    width: 100%; height: 100%; border-radius: 50%;
+    background: conic-gradient(#333 0deg 20deg, #111 20deg 40deg, #333 40deg 60deg, #111 60deg 360deg);
+    position: relative;
+    display: flex; align-items: center; justify-content: center;
+}
+.music-disc::after { /* Lỗ giữa đĩa */
+    content: ''; position: absolute; width: 12px; height: 12px;
+    background: #0f0f0f; border-radius: 50%; border: 2px solid #555;
+}
+/* Animation quay */
+.spinning { animation: spinDisc 3s linear infinite; }
+@keyframes spinDisc { 100% { transform: rotate(360deg); } }
+
+/* Icon nốt nhạc */
+.music-icon {
+    position: absolute; z-index: 2; color: white; font-size: 14px;
+    transition: opacity 0.3s;
+}
+/* Sóng nhạc (khi bật) */
+.music-wave {
+    position: absolute; bottom: 100%; left: 50%; transform: translateX(-50%);
+    width: 20px; height: 20px; pointer-events: none; opacity: 0;
+}
+.playing .music-wave { opacity: 1; animation: floatUp 2s linear infinite; }
+@keyframes floatUp {
+    0% { transform: translate(-50%, 0) scale(0.5); opacity: 0; }
+    50% { opacity: 1; }
+    100% { transform: translate(-50%, -40px) scale(1.2); opacity: 0; }
+}
     </style>
+
 </head>
 <body class="pb-24 min-h-screen flex flex-col">
 
@@ -140,6 +184,17 @@
     </div>
 
     <!-- FLOATING BUTTON (TIKTOK ONLY) -->
+    <!-- MUSIC PLAYER -->
+<div class="music-control" onclick="toggleMusic()" id="musicBtn">
+    <div class="music-disc" id="musicDisc"></div>
+    <i class="fa-solid fa-music music-icon" id="musicIcon"></i>
+    <i class="fa-solid fa-music music-wave text-pink-500"></i> <!-- Hiệu ứng bay -->
+    <!-- AUDIO TAG -->
+    <audio id="bgAudio" loop>
+        <!-- Sửa link nhạc của bạn vào đây -->
+        <source src="https://didi0310.github.io/Topshot/images/music.mp3" type="audio/mpeg">
+    </audio>
+</div>
     <div class="fixed bottom-6 right-4 flex flex-col gap-3 z-[60]">
         <a href="https://www.tiktok.com/@thetopshotdidi" target="_blank" class="w-12 h-12 bg-black border border-gray-700 rounded-full shadow-lg text-white flex items-center justify-center hover:scale-110 transition"><i class="fa-brands fa-tiktok text-lg"></i></a>
     </div>
@@ -399,7 +454,34 @@
             toast.classList.add('show');
             setTimeout(() => { toast.classList.remove('show'); }, 4000);
         }
+// --- MUSIC PLAYER LOGIC ---
+let isPlaying = false;
+const bgAudio = document.getElementById('bgAudio');
+const musicDisc = document.getElementById('musicDisc');
+const musicBtn = document.getElementById('musicBtn');
+const musicIcon = document.getElementById('musicIcon');
 
+function toggleMusic() {
+    if (isPlaying) {
+        bgAudio.pause();
+        musicDisc.classList.remove('spinning');
+        musicBtn.classList.remove('playing');
+        musicIcon.className = "fa-solid fa-play music-icon"; // Hiện nút Play
+        musicIcon.style.opacity = "1";
+    } else {
+        bgAudio.play().then(() => {
+            musicDisc.classList.add('spinning');
+            musicBtn.classList.add('playing');
+            musicIcon.className = "fa-solid fa-pause music-icon"; // Hiện nút Pause
+            // Ẩn icon đi để nhìn thấy đĩa quay cho đẹp, hover mới hiện
+            setTimeout(() => { musicIcon.style.opacity = "0.5"; }, 1000);
+        }).catch(err => {
+            console.log("Chặn tự động phát: " + err);
+            alert("Hãy chạm vào màn hình để bật nhạc!");
+        });
+    }
+    isPlaying = !isPlaying;
+}
         init();
     </script>
 </body>
