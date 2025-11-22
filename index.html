@@ -162,21 +162,21 @@
                         allProducts = results.data.map((row, idx) => {
                             let imgs = [];
                             
-                            // Helper xử lý link
+                            // Hàm xử lý link ảnh
                             const processImg = (raw) => {
                                 if (!raw || raw.length < 2) return null;
                                 if (raw.includes('http')) return raw; 
                                 return GITHUB_IMAGE_BASE + raw + ".jpg";
                             };
 
-                            // --- LOGIC ĐỌC 5 ẢNH ---
+                            // Đọc 5 ảnh
                             const i1 = processImg(row.image1); if(i1) imgs.push(i1);
                             const i2 = processImg(row.image2); if(i2) imgs.push(i2);
                             const i3 = processImg(row.image3); if(i3) imgs.push(i3);
                             const i4 = processImg(row.image4); if(i4) imgs.push(i4);
                             const i5 = processImg(row.image5); if(i5) imgs.push(i5);
                             
-                            // Dự phòng nếu sheet rỗng (mặc định 2 ảnh)
+                            // Fallback
                             if (imgs.length === 0 && row.code) {
                                 imgs.push(GITHUB_IMAGE_BASE + row.code + "-1.jpg");
                                 imgs.push(GITHUB_IMAGE_BASE + row.code + "-2.jpg");
@@ -187,14 +187,26 @@
                                 code: row.code || '???',
                                 category: row.category ? row.category.toLowerCase().trim() : 'khac',
                                 name: row.name || 'Sản phẩm mới',
-                                images: imgs, // Mảng này chứa đúng số lượng ảnh bạn nhập (1, 2, 3, 4 hoặc 5)
-                                isHot: (row.is_hot === 'TRUE'),
+                                images: imgs,
+                                isHot: (row.is_hot === 'TRUE'), // Google Sheet phải viết hoa chữ TRUE
                                 links: { 
                                     shopee: row.shopee_link, 
                                     tiktok: row.tiktok_link  
                                 }
                             };
                         });
+
+                        // --- TÍNH NĂNG MỚI: GHIM HOT LÊN ĐẦU ---
+                        allProducts.sort((a, b) => {
+                            // Nếu a Hot mà b không Hot -> a lên trước (-1)
+                            if (a.isHot && !b.isHot) return -1;
+                            // Nếu b Hot mà a không Hot -> b lên trước (1)
+                            if (!a.isHot && b.isHot) return 1;
+                            // Nếu cả 2 cùng Hot hoặc cùng không Hot -> Giữ nguyên thứ tự cũ
+                            return 0;
+                        });
+                        // ---------------------------------------
+
                         document.getElementById('loading').classList.add('hidden');
                         filterProducts();
                         startSocialProof();
@@ -204,6 +216,8 @@
             }
         }
 
+        // ... (GIỮ NGUYÊN TOÀN BỘ CÁC HÀM BÊN DƯỚI KHÔNG CẦN SỬA) ...
+        
         function renderProducts(data) {
             const container = document.getElementById('productList');
             const empty = document.getElementById('emptyState');
@@ -232,7 +246,6 @@
             });
         }
 
-        // --- SLIDER LOGIC ---
         let currentModalProductId = null;
         let currentImgIndex = 0;
 
@@ -251,7 +264,6 @@
             const btnShopee = document.getElementById('modalShopee');
             const btnTiktok = document.getElementById('modalTiktok');
             
-            // Ẩn nút nếu ko có link
             if (p.links.shopee && p.links.shopee.length > 1) {
                 btnShopee.href = p.links.shopee;
                 btnShopee.classList.remove('hidden');
